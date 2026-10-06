@@ -1,0 +1,10 @@
+{
+  "name": "swvision",
+  "private": true,
+  "type": "module",
+  "description": "Measure tennis racket swingweight from a pendulum swing video",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "serve": "python3 -m http.server 8000"
+  }
+}
