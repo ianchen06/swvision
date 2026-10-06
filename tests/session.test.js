@@ -49,6 +49,35 @@ test('frames marked not ok are excluded', () => {
   assert.equal(r.t.length, Math.round(20 * 60 * 0.8));
 });
 
+test('fitRange excludes a violent release at the start and a catch at the end', () => {
+  const s = new Session();
+  const T = 1.37;
+  let seed = 3;
+  const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32 - 0.5);
+  for (let i = 0; i < 45 * 60; i++) {
+    const t = i / 60;
+    let y = 100 + 28 * Math.cos((2 * Math.PI * t) / T) + 2 * rand();
+    if (t < 3) y = 100 + 50 * Math.sin(5.3 * t) + 25 * rand(); // hand releasing
+    if (t > 43) y = 100 + 30 * rand(); // hand catching
+    s.add({ t, x: 54, y, ok: true });
+  }
+  const r = s.fitRange();
+  assert.ok(r.valid, `rms=${r.fit.rms} A=${r.fit.A}`);
+  assert.ok(Math.abs(r.fit.T - T) / T < 0.0005, `T=${r.fit.T}`);
+  assert.ok(r.excluded.length >= 2, JSON.stringify(r.excluded));
+  assert.ok(r.excluded[0][0] < 0.5 && r.excluded[0][1] >= 2.5, JSON.stringify(r.excluded));
+  assert.ok(r.excluded.at(-1)[1] > 44.5, JSON.stringify(r.excluded));
+  const kept = r.t.length / (45 * 60);
+  assert.ok(kept > 0.8, `kept ${kept}`);
+});
+
+test('fitRange keeps everything for a clean signal', () => {
+  const s = new Session();
+  feed(s, { T: 1.37, fps: 60, from: 0, to: 30 });
+  const r = s.fitRange();
+  assert.deepEqual(r.excluded, []);
+});
+
 test('reset clears state', () => {
   const s = new Session();
   feed(s, { T: 1.37, fps: 30, from: 0, to: 25 });

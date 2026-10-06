@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Swingweight</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Swingweight</h1>
+      <p class="sub">Hang the racket from a pivot, film the butt cap from below, and let it swing.</p>
+    </header>
+
+    <main>
+      <section class="stage-col">
+        <nav class="tabs" role="tablist">
+          <button role="tab" id="tab-live" aria-selected="true">Live camera</button>
+          <button role="tab" id="tab-file" aria-selected="false">Video file</button>
+        </nav>
+
+        <div class="controls" id="live-controls">
+          <button id="btn-camera" class="primary">Start camera</button>
+          <button id="btn-reset">Reset</button>
+        </div>
+
+        <div class="controls" id="file-controls" hidden>
+          <label class="file-pick">Choose video<input type="file" id="file" accept="video/*" /></label>
+          <button id="btn-sample">Load sample</button>
+          <button id="btn-analyze" class="primary" disabled>Analyze</button>
+          <div class="range" id="range" hidden>
+            <label>Start <input type="range" id="range-start" min="0" max="1" step="0.01" value="0" /> <output id="range-start-out">0.0 s</output></label>
+            <label>End <input type="range" id="range-end" min="0" max="1" step="0.01" value="1" /> <output id="range-end-out">0.0 s</output></label>
+          </div>
+          <progress id="progress" max="1" value="0" hidden></progress>
+        </div>
+
+        <div class="stage">
+          <video id="video" muted playsinline></video>
+          <canvas id="overlay"></canvas>
+          <span id="status" class="badge idle">idle</span>
+        </div>
+        <p class="hint">Drag on the video to limit tracking to a region (optional). <button id="btn-clear-roi" class="link">Clear region</button></p>
+        <p id="message" class="message" hidden></p>
+      </section>
+
+      <section class="panel-col">
+        <div class="card">
+          <h2>Swing</h2>
+          <canvas id="trace"></canvas>
+          <dl class="stats">
+            <div><dt>Period</dt><dd id="period">—</dd></div>
+            <div><dt>Cycles</dt><dd id="cycles">—</dd></div>
+            <div><dt>Decay</dt><dd id="decay">—</dd></div>
+            <div><dt>Fit rms</dt><dd id="rms">—</dd></div>
+          </dl>
+          <p id="excluded" class="note"></p>
+        </div>
+
+        <div class="card">
+          <h2>Racket</h2>
+          <form id="inputs" class="inputs" autocomplete="off">
+            <label>Mass <span class="unit">g</span><input id="mass" type="number" step="0.1" min="0" placeholder="e.g. 320" /></label>
+            <label>Balance <span class="unit">cm from butt</span><input id="balance" type="number" step="0.1" min="0" placeholder="e.g. 32" /></label>
+            <label>Pivot <span class="unit">cm from butt</span><input id="pivot" type="number" step="0.1" min="0" placeholder="e.g. 67" /></label>
+            <details>
+              <summary>Advanced</summary>
+              <label>Swing amplitude <span class="unit">deg</span><input id="amp" type="number" step="0.5" min="0" value="0" /></label>
+              <label>g <span class="unit">cm/s²</span><input id="g" type="number" step="0.001" value="980.665" /></label>
+            </details>
+          </form>
+        </div>
+
+        <div class="card result">
+          <h2>Swingweight</h2>
+          <p class="sw"><span id="sw">—</span> <span id="sw-sigma" class="sigma"></span></p>
+          <p id="sw-note" class="note">Waiting for a period measurement.</p>
+          <dl class="stats">
+            <div><dt>I pivot</dt><dd id="ip">—</dd></div>
+            <div><dt>I center of mass</dt><dd id="icm">—</dd></div>
+          </dl>
+          <p id="sens" class="note"></p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="src/ui.js"></script>
+  </body>
+</html>

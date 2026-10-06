@@ -13,7 +13,7 @@ const BIN = new URL('./fixtures/img7825_gray.bin', import.meta.url);
 const PTS = new URL('./fixtures/img7825_pts.txt', import.meta.url);
 const present = existsSync(BIN) && existsSync(PTS);
 
-test('IMG_7825.MOV yields T = 1.3684 ± 0.001 s', { skip: !present && 'fixture missing' }, () => {
+test('IMG_7825.MOV yields T = 1.3676 ± 0.0005 s', { skip: !present && 'fixture missing' }, () => {
   const raw = readFileSync(BIN);
   const times = readFileSync(PTS, 'utf8').trim().split('\n').map(Number);
   const n = Math.min(times.length, Math.floor(raw.length / (W * H)));
@@ -35,10 +35,10 @@ test('IMG_7825.MOV yields T = 1.3684 ± 0.001 s', { skip: !present && 'fixture m
 
   const { fit, valid } = session.fitRange(0, Infinity);
   assert.ok(valid);
-  assert.ok(Math.abs(fit.T - 1.3684) < 0.001, `T=${fit.T} ± ${fit.sigmaT}`);
+  assert.ok(Math.abs(fit.T - 1.3676) < 0.0005, `T=${fit.T} ± ${fit.sigmaT}`);
   console.log(`T=${fit.T.toFixed(5)} ± ${fit.sigmaT.toFixed(5)} s, cycles=${fit.cycles.toFixed(1)}, rms=${fit.rms.toFixed(2)}px, A=${fit.A.toFixed(1)}px`);
 
   // Trimmed range agrees.
   const late = session.fitRange(15, 44);
-  assert.ok(Math.abs(late.fit.T - 1.3678) < 0.001, `late T=${late.fit.T}`);
+  assert.ok(Math.abs(late.fit.T - 1.3676) < 0.0005, `late T=${late.fit.T}`);
 });
