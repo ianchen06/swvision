@@ -2,10 +2,11 @@ import { Background } from './background.js';
 import { track } from './tracker.js';
 import { Session } from './session.js';
 import { swingweight } from './physics.js';
-import { FrameGrabber, openCamera, closeCamera, watchFrames, seekTo, hasFrameCallback, CameraError } from './frameSource.js';
+import { FrameGrabber, openCamera, closeCamera, countCameras, watchFrames, seekTo, hasFrameCallback, CameraError } from './frameSource.js';
 
 const SAMPLE_URL = 'assets/IMG_7825.MOV';
 const STORAGE_KEY = 'swvision.inputs';
+const FACING_KEY = 'swvision.facing';
 const UPDATE_MS = 250;
 const BG_PREFILL = 40;
 
@@ -13,7 +14,7 @@ const $ = (id) => document.getElementById(id);
 const el = {
   tabLive: $('tab-live'), tabFile: $('tab-file'),
   liveControls: $('live-controls'), fileControls: $('file-controls'),
-  btnCamera: $('btn-camera'), btnReset: $('btn-reset'),
+  btnCamera: $('btn-camera'), btnFlip: $('btn-flip'), btnReset: $('btn-reset'),
   file: $('file'), btnSample: $('btn-sample'), btnAnalyze: $('btn-analyze'),
   range: $('range'), rangeStart: $('range-start'), rangeEnd: $('range-end'),
   rangeStartOut: $('range-start-out'), rangeEndOut: $('range-end-out'), progress: $('progress'),
@@ -26,6 +27,7 @@ const el = {
 
 const state = {
   mode: 'live',
+  facing: localStorage.getItem(FACING_KEY) === 'user' ? 'user' : 'environment',
   running: false, // camera streaming or file being analyzed
   roi: null, // {x0,y0,x1,y1} normalized
   dragging: null,
@@ -145,14 +147,37 @@ el.btnCamera.onclick = async () => {
     setStatus('idle');
     return;
   }
+  await startCamera();
+};
+
+el.btnFlip.onclick = async () => {
+  state.facing = state.facing === 'user' ? 'environment' : 'user';
+  localStorage.setItem(FACING_KEY, state.facing);
+  renderFlip();
+  if (state.running && state.mode === 'live') {
+    stopAll();
+    await startCamera(); // new viewpoint: background and session start over
+  }
+};
+
+function renderFlip() {
+  el.btnFlip.textContent = state.facing === 'user' ? 'Use back camera' : 'Use front camera';
+}
+
+async function updateFlipVisibility() {
+  el.btnFlip.hidden = (await countCameras()) < 2;
+}
+
+async function startCamera() {
   resetMeasurement();
   showMessage('');
   try {
-    await openCamera(el.video);
+    await openCamera(el.video, state.facing);
   } catch (e) {
     showMessage(e instanceof CameraError ? e.message : String(e));
     return;
   }
+  updateFlipVisibility(); // device list is complete once permission is granted
   if (!hasFrameCallback()) showMessage('This browser lacks requestVideoFrameCallback; timing accuracy is reduced.');
   state.running = true;
   el.btnCamera.textContent = 'Stop camera';
@@ -580,4 +605,6 @@ window.addEventListener('resize', () => {
 el.video.addEventListener('loadeddata', drawOverlay);
 
 loadInputs();
+renderFlip();
+updateFlipVisibility();
 resetMeasurement();

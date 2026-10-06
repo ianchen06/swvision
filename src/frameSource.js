@@ -35,18 +35,29 @@ export class FrameGrabber {
 
 export class CameraError extends Error {}
 
-export async function openCamera(video) {
+/** facing: 'environment' (back) or 'user' (front). */
+export async function openCamera(video, facing = 'environment') {
   if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
     throw new CameraError('Camera access needs HTTPS (or localhost). Use the Video file tab instead, or serve this page over HTTPS.');
   }
+  const request = (facingMode) =>
+    navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode, frameRate: { ideal: 60 }, width: { ideal: 1280 } },
+    });
   let stream;
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { facingMode: { ideal: 'environment' }, frameRate: { ideal: 60 }, width: { ideal: 1280 } },
-    });
+    stream = await request({ exact: facing });
   } catch (e) {
-    throw new CameraError(`Could not open the camera (${e.name}). Check browser permissions, or use the Video file tab.`);
+    // Devices without that camera (or without facingMode support) reject "exact".
+    if (e.name !== 'OverconstrainedError' && e.name !== 'NotFoundError') {
+      throw new CameraError(`Could not open the camera (${e.name}). Check browser permissions, or use the Video file tab.`);
+    }
+    try {
+      stream = await request({ ideal: facing });
+    } catch (e2) {
+      throw new CameraError(`Could not open the camera (${e2.name}). Check browser permissions, or use the Video file tab.`);
+    }
   }
   video.removeAttribute('src');
   video.srcObject = stream;
@@ -54,6 +65,15 @@ export async function openCamera(video) {
   video.playsInline = true;
   await video.play();
   return stream;
+}
+
+export async function countCameras() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices.filter((d) => d.kind === 'videoinput').length;
+  } catch {
+    return 0;
+  }
 }
 
 export function closeCamera(video) {
