@@ -95,6 +95,19 @@
             <div><dt>I center of mass</dt><dd id="icm">—</dd></div>
           </dl>
           <p id="sens" class="note"></p>
+          <form id="save" class="save" hidden>
+            <input id="save-racket" placeholder="Racket (optional)" maxlength="80" />
+            <input id="save-note" placeholder="Note (optional)" maxlength="200" />
+            <button id="btn-save" class="primary" type="submit">Save</button>
+            <p id="save-msg" class="note"></p>
+          </form>
+        </div>
+
+        <div class="card" id="history" hidden>
+          <h2>History</h2>
+          <p id="history-msg" class="note"></p>
+          <button id="btn-history-retry" class="link" type="button" hidden>Retry</button>
+          <ul id="history-list" class="history"></ul>
         </div>
       </section>
     </main>

@@ -107,3 +107,12 @@ progress { width: 100%; }
   flex: 1 1 160px; min-width: 0; font: inherit; padding: 6px 8px;
   border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink);
 }
+.save { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.save .note { width: 100%; }
+.history { list-style: none; margin: 0; padding: 0; }
+.history li { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+.history li:first-child { border-top: none; }
+.history .h-main { display: flex; gap: 8px; align-items: baseline; }
+.history .h-main strong { font-variant-numeric: tabular-nums; }
+.history .h-meta { grid-column: 1; color: var(--muted); font-size: 13px; }
+.history li button { grid-column: 2; grid-row: 1 / span 2; align-self: center; }

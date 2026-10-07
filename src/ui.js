@@ -541,6 +541,7 @@ function renderResult() {
   const inputs = readInputs();
   const p = state.period;
   const clear = (note, isError = false) => {
+    accountUi.resultChanged(null);
     el.sw.textContent = '—';
     el.swSigma.textContent = '';
     el.ip.textContent = el.icm.textContent = '—';
@@ -573,6 +574,7 @@ function renderResult() {
   el.swNote.textContent = p.final ? 'Swingweight about the axis 10 cm from the butt.' : 'Provisional — still measuring.';
   const s = r.sensitivity;
   el.sens.textContent = `Sensitivity: ${fmtSigned(s.perCmPivot)} per cm of pivot, ${fmtSigned(s.perCmBalance)} per cm of balance, ${fmtSigned(s.perGram)} per gram.`;
+  accountUi.resultChanged({ inputs, period: p, result: r, source: state.mode });
 }
 
 const fmtSigned = (v) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`;
