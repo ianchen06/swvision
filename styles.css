@@ -101,3 +101,9 @@ progress { width: 100%; }
 .result .sigma { font-size: 18px; font-weight: 500; color: var(--muted); }
 .note { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
 .note.error { color: var(--fit); }
+
+.account-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.account-row input, .save input {
+  flex: 1 1 160px; min-width: 0; font: inherit; padding: 6px 8px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink);
+}

@@ -5,7 +5,9 @@ method. The racket hangs from a pivot and swings freely; a camera under the butt
 cap tracks the swing, the app fits the period, and combines it with the racket's
 mass, balance point and pivot distance.
 
-No build step, no dependencies, everything runs client-side.
+No build step and no npm dependencies; measuring runs entirely client-side.
+Optional sign-in and saved history use Supabase (`supabase-js` is loaded from
+esm.sh at runtime — if it can't load, everything except saving still works).
 
 ## Run
 
@@ -35,6 +37,19 @@ else dark moves in the frame.
 
 Accuracy note: when hung from the head, swingweight changes ≈7–8 units per cm of
 pivot error and ≈20 units per cm of balance error — measure those carefully.
+
+## Accounts and history (optional)
+
+1. In the Supabase SQL Editor, run `supabase/schema.sql`.
+2. Authentication → URL Configuration: set the Site URL and add every origin you
+   serve from (e.g. `http://localhost:8000`) to Redirect URLs.
+3. Put the project URL and publishable key in `src/config.js`. The publishable
+   key is public; row-level security restricts each user to their own rows.
+   Never put the secret/service_role key in the app.
+
+Sign in with an email magic link, press *Save* on a final result, and manage
+saved results in the History card. Supabase's built-in email sender allows only
+a few emails per hour.
 
 ## Physics
 

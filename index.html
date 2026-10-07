@@ -46,6 +46,20 @@
       </section>
 
       <section class="panel-col">
+        <div class="card" id="account">
+          <h2>Account</h2>
+          <p id="account-status" class="note">Loading sign-in…</p>
+          <form id="signin" class="account-row" hidden>
+            <input id="email" type="email" required placeholder="you@example.com" autocomplete="email" />
+            <button id="btn-send-link" class="primary" type="submit">Send link</button>
+          </form>
+          <div id="signed-in" class="account-row" hidden>
+            <span>Signed in as <strong id="user-email"></strong></span>
+            <button id="btn-signout" type="button">Sign out</button>
+          </div>
+          <p id="account-note" class="note"></p>
+        </div>
+
         <div class="card">
           <h2>Swing</h2>
           <canvas id="trace"></canvas>

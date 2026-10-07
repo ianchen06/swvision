@@ -3,6 +3,7 @@ import { track } from './tracker.js';
 import { Session } from './session.js';
 import { swingweight } from './physics.js';
 import { FrameGrabber, openCamera, closeCamera, countCameras, watchFrames, seekTo, hasFrameCallback, CameraError } from './frameSource.js';
+import { initAccountUi } from './accountUi.js';
 
 const SAMPLE_URL = 'assets/IMG_7825.MOV';
 const STORAGE_KEY = 'swvision.inputs';
@@ -42,6 +43,8 @@ const state = {
   fileUrl: null,
   analyzed: null, // {start, end} processed range in file mode
 };
+
+const accountUi = initAccountUi();
 
 // ---------- status / messages ----------
 
