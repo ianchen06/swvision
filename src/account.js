@@ -13,6 +13,13 @@ export function isConfigured(url, key) {
   return [url, key].every((v) => typeof v === 'string' && v.trim() !== '' && !v.includes('<'));
 }
 
+/** Error message from a failed magic-link return (`#error=…&error_description=…`), or null. */
+export function linkError(hash) {
+  const params = new URLSearchParams(String(hash ?? '').replace(/^#/, ''));
+  if (!params.has('error')) return null;
+  return params.get('error_description') || params.get('error');
+}
+
 function message(error) {
   if (error.status === 429 || /rate limit/i.test(error.message ?? '')) return RATE_LIMIT_MESSAGE;
   return error.message || String(error);

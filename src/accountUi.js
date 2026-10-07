@@ -1,6 +1,6 @@
 // Account card, Save row and History card. Everything Supabase-related is
 // optional: if loading fails the measuring app is unaffected.
-import { loadAccount } from './account.js';
+import { loadAccount, linkError } from './account.js';
 import { buildRecord, recordKey, saveButtonState, formatRow } from './history.js';
 
 const $ = (id) => document.getElementById(id);
@@ -12,7 +12,7 @@ export function initAccountUi() {
     save: $('save'), racket: $('save-racket'), saveNote: $('save-note'), btnSave: $('btn-save'), saveMsg: $('save-msg'),
     history: $('history'), historyMsg: $('history-msg'), btnRetry: $('btn-history-retry'), list: $('history-list'),
   };
-  const state = { account: null, user: null, snapshot: null, saving: false, savedKey: null };
+  const state = { account: null, user: null, snapshot: null, saving: false, savedKey: null, loadSeq: 0 };
 
   const setNote = (node, text, isError = false) => {
     node.textContent = text;
@@ -67,12 +67,15 @@ export function initAccountUi() {
     e.preventDefault();
     const record = currentRecord();
     if (!record || state.saving) return;
+    const uid = state.user?.id;
     state.saving = true;
     setNote(el.saveMsg, '');
     renderSave();
     const { error } = await state.account.saveMeasurement(record);
     state.saving = false;
-    if (error) {
+    if (state.user?.id !== uid) {
+      // Signed out or switched account meanwhile; don't mark the new state as saved.
+    } else if (error) {
       setNote(el.saveMsg, `Could not save: ${error}`, true);
     } else {
       state.savedKey = recordKey(record);
@@ -84,10 +87,13 @@ export function initAccountUi() {
   // ---------- history ----------
 
   async function loadHistory() {
+    const seq = ++state.loadSeq;
+    const uid = state.user?.id;
     el.btnRetry.hidden = true;
     setNote(el.historyMsg, 'Loading…');
     const { data, error } = await state.account.listMeasurements();
-    if (!state.user) return; // signed out while loading
+    // Drop responses superseded by a newer load or meant for another (or no) user.
+    if (seq !== state.loadSeq || state.user?.id !== uid) return;
     if (error) {
       setNote(el.historyMsg, `Could not load history: ${error}`, true);
       el.btnRetry.hidden = false;
@@ -134,6 +140,12 @@ export function initAccountUi() {
   el.btnRetry.addEventListener('click', () => loadHistory());
 
   // ---------- startup ----------
+
+  const badLink = linkError(location.hash);
+  if (badLink) {
+    setNote(el.note, `Sign-in link failed: ${badLink}. Send a new link.`, true);
+    history.replaceState(null, '', location.pathname + location.search);
+  }
 
   loadAccount()
     .then((account) => {

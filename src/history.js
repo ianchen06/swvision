@@ -21,7 +21,8 @@ export function buildRecord({ inputs, period, result, racket, note, source }) {
     g: inputs.g,
     period_s: period.T,
     period_sigma_s: period.sigmaT ?? null,
-    cycles: period.cycles ?? null,
+    // The final fit's count; period.cycles keeps growing on live ticks after lock.
+    cycles: period.fit?.cycles ?? period.cycles ?? null,
     source: SOURCES.has(source) ? source : null,
     swingweight: result.SW,
     swingweight_sigma: result.sigmaSW ?? null,

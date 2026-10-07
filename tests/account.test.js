@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createAccount, isConfigured, HISTORY_LIMIT, RATE_LIMIT_MESSAGE } from '../src/account.js';
+import { createAccount, isConfigured, linkError, HISTORY_LIMIT, RATE_LIMIT_MESSAGE } from '../src/account.js';
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
@@ -104,4 +104,12 @@ test('onAuthChange delivers users asynchronously and unsubscribes', async () => 
   assert.deepEqual(seen, [null, { id: 'u1', email: 'me@example.com' }]);
   off();
   assert.deepEqual(c.calls.at(-1), ['unsubscribe']);
+});
+
+test('linkError reads the error Supabase puts in the URL hash of a bad magic link', () => {
+  const hash = '#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired';
+  assert.equal(linkError(hash), 'Email link is invalid or has expired');
+  assert.equal(linkError('#error=server_error'), 'server_error');
+  assert.equal(linkError('#access_token=abc&type=magiclink'), null);
+  assert.equal(linkError(''), null);
 });

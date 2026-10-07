@@ -49,6 +49,15 @@ test('recordKey ignores labels but tracks measurement values', () => {
   assert.notEqual(recordKey(a), recordKey(c));
 });
 
+test('live-mode ticks after lock keep the same record and key', () => {
+  // ui.js copies session's ever-growing span/T into period.cycles on every tick.
+  const fit = { T: period.T, sigmaT: period.sigmaT, cycles: 8.7 };
+  const tick1 = buildRecord({ ...base, period: { ...period, fit, cycles: 10.2 } });
+  const tick2 = buildRecord({ ...base, period: { ...period, fit, cycles: 10.6 } });
+  assert.equal(tick1.cycles, 8.7);
+  assert.equal(recordKey(tick1), recordKey(tick2));
+});
+
 test('saveButtonState covers hidden, ready, saving and saved', () => {
   const record = buildRecord(base);
   assert.deepEqual(saveButtonState({ signedIn: false, record, savedKey: null, saving: false }), { visible: false });
